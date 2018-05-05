@@ -1,77 +1,73 @@
 'use strict';
 
 let tabs;
-let selectedTab = 0;
+let highlightedTab = 0;
 
 let main = async () => {
   tabs = await getTabs();
-  console.log('tabs', tabs)
   renderTabs()
 }
 
 const renderTabs = () => {
   let container = document.getElementById('closed-tabs')
   container.innerHTML = '';
+  tabs = tabs || []
   tabs.forEach((tab, index) => {
     let element = document.createElement('li');
     element.innerHTML = tab.url;
-    if (index === selectedTab) {
+    if (index === highlightedTab) {
       element.classList.add('active')
     }
     container.appendChild(element)
   })
+  let element = document.createElement('li');
+  element.innerHTML = 'Clear Tabs'
+  if (tabs.length === highlightedTab) {
+    element.classList.add('active')
+  }
+  container.appendChild(element)
 }
 
-const selectUp = () => {
-  selectedTab > 0 ? selectedTab-- : selectedTab
-
+const highlightUp = () => {
+  highlightedTab > 0 ? highlightedTab-- : highlightedTab
   renderTabs();
 }
 
-const selectDown = () => {
-  selectedTab <= tabs.length ? selectedTab++ : selectedTab
+const highlightDown = () => {
+  console.log(tabs.length)
+  highlightedTab < tabs.length ? highlightedTab++ : highlightedTab
   renderTabs();
 }
 
-const openSelectedTab = () => {
-  let win = window.open(tabs[selectedTab].url, '_blank');
+const selectTab = () => {
+  if (tabs.length === highlightedTab) {
+    chrome.storage.sync.set({ closedTabs: [] })
+    return;
+  }
+  let win = window.open(tabs[highlightedTab].url, '_blank');
   win.focus();
 }
-
-// chrome.storage.sync.get('tabs', (data) => {
-//   console.log(data)
-//   let container = document.getElementById('closed-tabs')
-//   data.tabs.forEach((tab) => {
-//     let element = document.createElement('li');
-//     element.innerHTML = tab.url;
-//     container.appendChild(element)
-//   })
-// });
-
-
 
 document.onkeydown = (e) => {
   switch (e.key) {
     case 'ArrowUp':
-      selectUp();
+      highlightUp();
       break;
 
     case 'ArrowDown':
-      selectDown();
+      highlightDown();
       break;
 
     case 'Enter':
-      openSelectedTab();
+      selectTab();
       break;
 
   }
-  console.log(e)
 }
 
 const getTabs = async () => {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get('tabs', result => {
-      console.log(result)
+    chrome.storage.sync.get('closedTabs', result => {
       resolve(result.tabs)
     })
   })
