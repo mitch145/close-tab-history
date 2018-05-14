@@ -4,14 +4,19 @@ let tabs;
 let highlightedTab = 0;
 
 let main = async () => {
-  tabs = await getTabs();
   renderTabs()
 }
 
-const renderTabs = () => {
+const renderTabs = async () => {
+  try{
+    tabs = await getTabs();
+    console.log('tabawait', tabs)
+  } catch(err){
+    console.log('err', err)
+  }
+  console.log('renderTabs', tabs)
   let container = document.getElementById('closed-tabs')
   container.innerHTML = '';
-  tabs = tabs || []
   tabs.forEach((tab, index) => {
     let element = document.createElement('li');
     element.innerHTML = tab.url;
@@ -41,10 +46,16 @@ const highlightDown = () => {
 
 const selectTab = () => {
   if (tabs.length === highlightedTab) {
-    chrome.storage.sync.set({ closedTabs: [] })
+    chrome.storage.local.set({ closedTabs: [] })
     return;
+  } else {
+    chrome.storage.local.set({
+      closedTabs: [...tabs.slice(0, highlightedTab), ...tabs.slice(highlightedTab + 1, tabs.length)]
+    })
   }
+
   let win = window.open(tabs[highlightedTab].url, '_blank');
+
   win.focus();
 }
 
@@ -65,10 +76,11 @@ document.onkeydown = (e) => {
   }
 }
 
-const getTabs = async () => {
+const getTabs = () => {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get('closedTabs', result => {
-      resolve(result.tabs)
+    chrome.storage.local.get('closedTabs', result => {
+      console.log('result', result)
+      resolve(result.closedTabs)
     })
   })
 }

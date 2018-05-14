@@ -3,14 +3,28 @@
 chrome.runtime.onInstalled.addListener(async () => {
   let tabs = [];
   tabs = await getTabs();
+  // clear on install
+  chrome.storage.local.set({ 
+    closedTabs: []
+  });
 
   chrome.tabs.onRemoved.addListener(async (tabId, removed) => {
     let closedTab = tabs.find((tab) => tab.id === tabId)
     console.log('1', closedTab)
-    let closedTabs = chrome.storage.sync.get(['closedTabs'], (data) => {
-      console.log(data)
-      chrome.storage.sync.set({ 
-        closedTabs: data.closedTabs ? data.closedTabs.push(closedTab) : [closedTab]
+    chrome.storage.local.get(['closedTabs'], (data) => {
+      let closedTabs = data.closedTabs;
+      console.log('data', data)
+      console.log('closedTab', closedTab)
+      console.log('closedTabs', closedTabs)
+      let newTabs;
+      if(!closedTabs){
+        newTabs = [closedTab]
+      } else {
+        newTabs = [...closedTabs, closedTab]
+      }
+      console.log('newTabs', newTabs)
+      chrome.storage.local.set({ 
+        closedTabs: newTabs
       });
     });
     tabs = await getTabs();
