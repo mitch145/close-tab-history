@@ -42,6 +42,9 @@ chrome.runtime.onInstalled.addListener(async () => {
 const getTabs = async () => {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({}, (tabs) => {
+      chrome.storage.local.set({
+        tabs
+      })
       resolve(tabs)
     })
   })

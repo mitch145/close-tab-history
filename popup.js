@@ -9,7 +9,7 @@ let main = async () => {
 
 const renderTabs = async () => {
   try{
-    tabs = await getTabs();
+    tabs = await getClosedTabs();
     console.log('tabawait', tabs)
   } catch(err){
     console.log('err', err)
@@ -44,7 +44,7 @@ const highlightDown = () => {
   renderTabs();
 }
 
-const selectTab = () => {
+const selectTab = async () => {
   if (tabs.length === highlightedTab) {
     chrome.storage.local.set({ closedTabs: [] })
     return;
@@ -55,8 +55,9 @@ const selectTab = () => {
   }
 
   let win = window.open(tabs[highlightedTab].url, '_blank');
-
   win.focus();
+  
+  await getTabs();
 }
 
 document.onkeydown = (e) => {
@@ -76,11 +77,22 @@ document.onkeydown = (e) => {
   }
 }
 
-const getTabs = () => {
+const getClosedTabs = () => {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get('closedTabs', result => {
       console.log('result', result)
       resolve(result.closedTabs)
+    })
+  })
+}
+
+const getTabs = async () => {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({}, (tabs) => {
+      chrome.storage.local.set({
+        tabs
+      })
+      resolve(tabs)
     })
   })
 }
