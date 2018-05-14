@@ -8,28 +8,15 @@ let main = async () => {
 }
 
 const renderTabs = async () => {
-  try{
-    tabs = await getClosedTabs();
-    console.log('tabawait', tabs)
-  } catch(err){
-    console.log('err', err)
-  }
+  tabs = await getClosedTabs();
   console.log('renderTabs', tabs)
-  let container = document.getElementById('closed-tabs')
+  let container = document.getElementById('tabs')
   container.innerHTML = '';
   tabs.forEach((tab, index) => {
-    let element = document.createElement('li');
-    element.innerHTML = tab.url;
-    if (index === highlightedTab) {
-      element.classList.add('active')
-    }
+    let element = createNewItem(tab.title, tab.favIconUrl, index === highlightedTab)
     container.appendChild(element)
   })
-  let element = document.createElement('li');
-  element.innerHTML = 'Clear Tabs'
-  if (tabs.length === highlightedTab) {
-    element.classList.add('active')
-  }
+  let element = createNewItem('Clear Tabs', 'https://cdn4.iconfinder.com/data/icons/business-office-32/24/Material_icons-07-98-512.png', tabs.length === highlightedTab)
   container.appendChild(element)
 }
 
@@ -56,7 +43,7 @@ const selectTab = async () => {
 
   let win = window.open(tabs[highlightedTab].url, '_blank');
   win.focus();
-  
+
   await getTabs();
 }
 
@@ -75,6 +62,29 @@ document.onkeydown = (e) => {
       break;
 
   }
+}
+
+const createNewItem = (title, favicon, active) => {
+  let container = document.createElement('div');
+  container.classList.add('tab-container')
+
+  // add image
+  let imageEl = document.createElement('img')
+  imageEl.src = favicon
+  imageEl.classList.add('tab-image')
+  container.appendChild(imageEl)
+
+  // add image
+  let titleEl = document.createElement('p')
+  titleEl.innerHTML = title;
+  titleEl.classList.add('tab-title')
+  container.appendChild(titleEl)
+  
+  // add active class
+  if (active) {
+    container.classList.add('active')
+  }
+  return container;
 }
 
 const getClosedTabs = () => {
