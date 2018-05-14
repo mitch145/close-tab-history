@@ -69,12 +69,14 @@ const createNewItem = (title, favicon, active) => {
   container.classList.add('tab-container')
 
   // add image
-  let imageEl = document.createElement('img')
-  imageEl.src = favicon
-  imageEl.classList.add('tab-image')
-  container.appendChild(imageEl)
+  if(favicon){
+    let imageEl = document.createElement('img')
+    imageEl.src = favicon
+    imageEl.classList.add('tab-image')
+    container.appendChild(imageEl)
+  }
 
-  // add image
+  // add title
   let titleEl = document.createElement('p')
   titleEl.innerHTML = title;
   titleEl.classList.add('tab-title')
